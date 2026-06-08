@@ -40,7 +40,7 @@ A [MediaWiki](https://www.mediawiki.org/) extension that modernises the faceted-
 
 ```bash
 cd /path/to/your/wiki/extensions
-git clone https://github.com/Saintapedia/SaintapediaSearch.git SaintapediaSort
+git clone https://github.com/Saintapedia/SaintapediaSort.git SaintapediaSort
 ```
 
 **Option B — Download ZIP**
@@ -235,7 +235,7 @@ body.special-SpecialDrilldown .cargo-drilldown-layout {
 
 ## Contributing
 
-Pull requests and issues are welcome at [github.com/Saintapedia/SaintapediaSearch](https://github.com/Saintapedia/SaintapediaSearch).
+Pull requests and issues are welcome at [github.com/Saintapedia/SaintapediaSort](https://github.com/Saintapedia/SaintapediaSort).
 
 When submitting a PR please:
 - Keep all CSS rules scoped to `.cargo-drilldown-layout`.
