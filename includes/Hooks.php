@@ -12,8 +12,6 @@ namespace MediaWiki\Extension\SaintapediaSort;
 
 use MediaWiki\Config\Config;
 use MediaWiki\Hook\BeforePageDisplayHook;
-use OutputPage;
-use Skin;
 
 class Hooks implements BeforePageDisplayHook {
 
@@ -24,8 +22,8 @@ class Hooks implements BeforePageDisplayHook {
 	}
 
 	/**
-	 * @param OutputPage $out
-	 * @param Skin $skin
+	 * @param \OutputPage $out
+	 * @param \Skin $skin
 	 */
 	public function onBeforePageDisplay( $out, $skin ): void {
 		if ( !$this->config->get( 'SaintapediaSortSidebarEnabled' ) ) {
@@ -33,13 +31,7 @@ class Hooks implements BeforePageDisplayHook {
 		}
 
 		$title = $out->getTitle();
-		if ( $title === null || !$title->isSpecialPage() ) {
-			return;
-		}
-
-		// strpos used for PHP 7.4 compatibility (str_starts_with requires PHP 8.0+)
-		$dbKey = $title->getDBkey();
-		if ( $dbKey !== 'Drilldown' && strpos( $dbKey, 'Drilldown/' ) !== 0 ) {
+		if ( $title === null || !$title->isSpecial( 'Drilldown' ) ) {
 			return;
 		}
 

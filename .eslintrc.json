@@ -1,0 +1,9 @@
+{
+	"extends": "wikimedia/mediawiki",
+	"env": {
+		"browser": true
+	},
+	"globals": {
+		"mw": "readonly"
+	}
+}

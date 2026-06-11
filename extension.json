@@ -1,6 +1,6 @@
 {
 	"name": "SaintapediaSort",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"author": [ "Saintapedia contributors" ],
 	"url": "https://github.com/Saintapedia/SaintapediaSort",
 	"descriptionmsg": "saintapediasort-desc",
@@ -9,11 +9,14 @@
 	"requires": {
 		"MediaWiki": ">= 1.39.0",
 		"extensions": {
-			"Cargo": "*"
+			"Cargo": ">= 3.0"
 		}
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\SaintapediaSort\\": "includes/"
+	},
+	"MessagesDirs": {
+		"SaintapediaSort": [ "i18n" ]
 	},
 	"HookHandlers": {
 		"main": {
@@ -29,12 +32,12 @@
 			"styles": [ "modules/ext.SaintapediaSort.css" ],
 			"scripts": [ "modules/ext.SaintapediaSort.js" ],
 			"dependencies": [ "mediawiki.util" ],
-			"targets": [ "desktop", "mobile" ],
 			"messages": [
 				"saintapediasort-show-filters",
 				"saintapediasort-hide-filters",
 				"saintapediasort-clear-filters",
-				"saintapediasort-remove-filter"
+				"saintapediasort-remove-filter",
+				"saintapediasort-active-filters"
 			]
 		}
 	},

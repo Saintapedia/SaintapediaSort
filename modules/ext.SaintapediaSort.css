@@ -37,25 +37,24 @@
 	box-sizing: border-box;
 }
 
-/* Sticky sidebar — only when JS adds .cargo-filters-sticky */
-@media ( min-width: 720px ) {
-	.cargo-drilldown-layout .drilldown-filters-wrapper.cargo-filters-sticky {
-		position: sticky;
-		top: 0.75em;
-		max-height: calc( 100dvh - 1.5em );
-		overflow-y: auto;
-		scrollbar-width: thin;
-		scrollbar-color: var( --cargo-filter-border ) transparent;
-	}
+/* Sticky sidebar — only on desktop (when .cargo-mobile-layout is absent) */
+.cargo-drilldown-layout:not( .cargo-mobile-layout ) .drilldown-filters-wrapper.cargo-filters-sticky {
+	position: sticky;
+	top: 0.75em;
+	max-height: calc( 100vh - 1.5em );
+	max-height: calc( 100dvh - 1.5em );
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: var( --cargo-filter-border ) transparent;
+}
 
-	.cargo-drilldown-layout .drilldown-filters-wrapper.cargo-filters-sticky::-webkit-scrollbar {
-		width: 5px;
-	}
+.cargo-drilldown-layout:not( .cargo-mobile-layout ) .drilldown-filters-wrapper.cargo-filters-sticky::-webkit-scrollbar {
+	width: 5px;
+}
 
-	.cargo-drilldown-layout .drilldown-filters-wrapper.cargo-filters-sticky::-webkit-scrollbar-thumb {
-		background: var( --cargo-filter-border );
-		border-radius: 3px;
-	}
+.cargo-drilldown-layout:not( .cargo-mobile-layout ) .drilldown-filters-wrapper.cargo-filters-sticky::-webkit-scrollbar-thumb {
+	background: var( --cargo-filter-border );
+	border-radius: 3px;
 }
 
 /* 3. Results area */
@@ -111,11 +110,17 @@ a.cargo-chip-remove:focus {
 	text-decoration: none;
 }
 
+a.cargo-chip-remove:focus-visible {
+	outline: 2px solid #3680b0;
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
 .cargo-clear-all { margin-left: auto; white-space: nowrap; }
 .cargo-clear-all a { color: #555; font-size: 0.9em; }
 .cargo-clear-all a:hover { color: #cc0000; }
 
-/* 5. Mobile toggle button */
+/* 5. Mobile toggle button — hidden by default; shown by .cargo-mobile-layout */
 .cargo-filters-toggle {
 	display: none;
 	width: 100%;
@@ -141,43 +146,8 @@ a.cargo-chip-remove:focus {
 
 .cargo-drilldown-layout .drilldown-filter-values { word-break: break-word; }
 
-/* 7. Mobile layout
-   Two triggers for the same rules:
-   a) @media — no-JS fallback at the default 720px breakpoint
-   b) .cargo-mobile-layout — JS-driven class, respects $wgSaintapediaSortMobileBreakpoint
-   ------------------------------------------------------------------ */
-@media ( max-width: 719px ) {
-	.cargo-drilldown-layout {
-		flex-direction: column;
-	}
-
-	.cargo-drilldown-layout .drilldown-results {
-		order: 1;
-		width: 100%;
-	}
-
-	.cargo-drilldown-layout .drilldown-filters-wrapper {
-		order: 2;
-		flex: none;
-		width: 100%;
-		max-width: none;
-		position: static;
-		max-height: none;
-		overflow: visible;
-	}
-
-	.cargo-drilldown-layout .drilldown-filters-wrapper.cargo-filters-collapsed {
-		display: none;
-	}
-
-	.cargo-filters-toggle {
-		display: block;
-		order: 2;
-		margin-top: 0.5em;
-	}
-}
-
-/* JS-driven mobile layout class (handles non-default breakpoints) */
+/* 7. Mobile layout — driven entirely by .cargo-mobile-layout (set by JS matchMedia watcher).
+   JS is the single source of truth for the breakpoint; the extension requires JavaScript. */
 .cargo-drilldown-layout.cargo-mobile-layout {
 	flex-direction: column;
 }
@@ -201,8 +171,7 @@ a.cargo-chip-remove:focus {
 	display: none;
 }
 
-.cargo-drilldown-layout.cargo-mobile-layout ~ .cargo-filters-toggle,
-.cargo-mobile-layout .cargo-filters-toggle {
+.cargo-drilldown-layout.cargo-mobile-layout .cargo-filters-toggle {
 	display: block;
 	order: 2;
 	margin-top: 0.5em;
