@@ -8,7 +8,7 @@
  * 3. Adds a mobile toggle whose state is persisted via mw.storage and only
  *    written on explicit user action.
  * 4. Uses matchMedia as the single source of truth for the configured
- *    breakpoint; static CSS @media covers the no-JS fallback.
+ *    breakpoint.
  */
 ( function () {
 	'use strict';
@@ -32,26 +32,64 @@
 		'curid', 'redirect', 'veaction', 'mobileaction'
 	];
 
+	// Params with these prefixes are user-applied filters, not Cargo internals.
+	var FILTER_PREFIXES = [ '_search_' ];
+
 	function isInternalParam( key ) {
+		var i;
+		for ( i = 0; i < FILTER_PREFIXES.length; i++ ) {
+			if ( key.indexOf( FILTER_PREFIXES[ i ] ) === 0 ) { return false; }
+		}
 		return key.charAt( 0 ) === '_' || RESERVED.indexOf( key ) !== -1;
 	}
 
 	/**
 	 * Returns filter objects for every non-internal URL param.
+	 * Bracket-indexed params (e.g. Date[0]/Date[1]) are collapsed into one
+	 * entry with isFamily:true and a joined value ("2020 → 2021").
+	 * Params matching FILTER_PREFIXES (e.g. _search_Name) appear as chips
+	 * labelled "Name (search)".
 	 *
 	 * @param {string} search  window.location.search or a bare query string
-	 * @return {Array.<{key:string, label:string, value:string}>}
+	 * @return {Array.<{key:string,label:string,value:string,isFamily:boolean}>}
 	 */
 	function getActiveFilters( search ) {
-		var params  = new URLSearchParams( search );
-		var filters = [];
+		var params   = new URLSearchParams( search );
+		var filters  = [];
+		var families = {};
+
 		params.forEach( function ( val, key ) {
 			if ( isInternalParam( key ) ) { return; }
-			var label = key
-				.replace( /\[([^\]]+)\]$/, ' ($1)' )
-				.replace( /_/g, ' ' );
+
+			// Group bracket-indexed params (Date[0], Date[1], …) by base key.
+			var bm = key.match( /^(.+)\[\d+\]$/ );
+			if ( bm ) {
+				var base = bm[ 1 ];
+				if ( !families[ base ] ) { families[ base ] = []; }
+				families[ base ].push( { key: key, value: val } );
+				return;
+			}
+
+			// _search_X → label "X (search)"
+			var sm = key.match( /^_search_(.+)$/ );
+			var label = sm
+				? sm[ 1 ].replace( /_/g, ' ' ) + ' (search)'
+				: key.replace( /_/g, ' ' );
 			filters.push( { key: key, label: label, value: val } );
 		} );
+
+		// Emit one chip per bracket family (appended after scalar filters).
+		Object.keys( families ).forEach( function ( base ) {
+			var members = families[ base ];
+			filters.push( {
+				key:        base,
+				label:      base.replace( /_/g, ' ' ),
+				isFamily:   true,
+				familyKeys: members.map( function ( m ) { return m.key; } ),
+				value:      members.map( function ( m ) { return m.value; } ).join( ' → ' )
+			} );
+		} );
+
 		return filters;
 	}
 
@@ -75,6 +113,28 @@
 	}
 
 	/**
+	 * Returns a query string with all members of a bracket family removed
+	 * (baseKey, baseKey[0], baseKey[1], …) and _offset reset.
+	 *
+	 * @param {string} search
+	 * @param {string} baseKey  base name, e.g. "Date" removes Date[0], Date[1]
+	 * @return {string}  query string (no leading '?')
+	 */
+	function buildRemoveFamilySearch( search, baseKey ) {
+		var params   = new URLSearchParams( search );
+		var prefix   = baseKey + '[';
+		var toDelete = [];
+		params.forEach( function ( v, k ) {
+			if ( k === baseKey || k.indexOf( prefix ) === 0 ) {
+				toDelete.push( k );
+			}
+		} );
+		toDelete.forEach( function ( k ) { params.delete( k ); } );
+		params.delete( '_offset' );
+		return params.toString();
+	}
+
+	/**
 	 * Returns a query string that keeps only internal display params and
 	 * reserved MW params, dropping all filter params and resetting _offset.
 	 *
@@ -85,6 +145,11 @@
 		var params = new URLSearchParams( search );
 		var kept   = new URLSearchParams();
 		params.forEach( function ( v, k ) {
+			var i;
+			// Drop user-applied filter-prefix params (e.g. _search_*).
+			for ( i = 0; i < FILTER_PREFIXES.length; i++ ) {
+				if ( k.indexOf( FILTER_PREFIXES[ i ] ) === 0 ) { return; }
+			}
 			if ( ( k.charAt( 0 ) === '_' && k !== '_offset' ) ||
 					RESERVED.indexOf( k ) !== -1 ) {
 				kept.append( k, v );
@@ -97,7 +162,17 @@
 
 	function el( tag, cls, text ) {
 		var node = document.createElement( tag );
-		if ( cls )  { node.className = cls; }
+		if ( cls ) {
+			// The following CSS classes are used here:
+			// * cargo-drilldown-layout
+			// * cargo-active-filters
+			// * cargo-filter-chip
+			// * cargo-chip-label
+			// * cargo-chip-remove
+			// * cargo-clear-all
+			// * cargo-filters-toggle
+			node.className = cls;
+		}
 		if ( text ) { node.textContent = text; }
 		return node;
 	}
@@ -131,7 +206,9 @@
 			var chip   = el( 'span', 'cargo-filter-chip' );
 			var text   = el( 'span', 'cargo-chip-label',
 				mw.msg( 'saintapediasort-chip-text', f.label, f.value ) );
-			var qs     = buildRemoveSearch( window.location.search, f.key, f.value );
+			var qs     = f.isFamily
+				? buildRemoveFamilySearch( window.location.search, f.key )
+				: buildRemoveSearch( window.location.search, f.key, f.value );
 			var remove = el( 'a', 'cargo-chip-remove', '×' );
 			remove.href  = window.location.pathname + ( qs ? '?' + qs : '' );
 			remove.title = mw.msg( 'saintapediasort-remove-filter' );
@@ -256,9 +333,10 @@
 	// Export pure helpers for unit testing; no-op in MediaWiki environment.
 	if ( typeof module !== 'undefined' && module.exports ) {
 		module.exports = {
-			getActiveFilters: getActiveFilters,
-			buildRemoveSearch: buildRemoveSearch,
-			buildClearSearch: buildClearSearch
+			getActiveFilters:        getActiveFilters,
+			buildRemoveSearch:       buildRemoveSearch,
+			buildRemoveFamilySearch: buildRemoveFamilySearch,
+			buildClearSearch:        buildClearSearch
 		};
 	}
 

@@ -51,17 +51,20 @@ class Hooks implements BeforePageDisplayHook {
 			'saintapediaSortMobileBreakpoint' => $mobileBreak,
 		] );
 
-		// Styles loaded render-blocking so the sidebar layout is present at first paint.
+		// Styles loaded render-blocking to avoid a style pop when JS applies the flex layout.
 		$out->addModuleStyles( 'ext.SaintapediaSort.styles' );
 		$out->addModules( 'ext.SaintapediaSort' );
 
-		// When the admin sets a non-default breakpoint, override the static @media
-		// (max-width:719px) block in the CSS with the configured value.
+		// Emit the configured mobile breakpoint; omitted at the default 720px.
 		if ( $mobileBreak !== 720 ) {
 			$out->addInlineStyle( $this->mobileBreakpointCss( $mobileBreak ) );
 		}
 	}
 
+	/**
+	 * @param int $bp  Configured mobile breakpoint in pixels (already clamped).
+	 * @return string  Inline CSS @media block for the configured breakpoint.
+	 */
 	private function mobileBreakpointCss( int $bp ): string {
 		$mobileCss =
 			'.cargo-drilldown-layout{flex-direction:column}' .
@@ -71,22 +74,6 @@ class Hooks implements BeforePageDisplayHook {
 			'.cargo-drilldown-layout .drilldown-filters-wrapper.cargo-filters-collapsed{display:none}' .
 			'.cargo-drilldown-layout .cargo-filters-toggle{display:block;order:2;margin-top:0.5em}';
 
-		$css = '@media(max-width:' . ( $bp - 1 ) . 'px){' . $mobileCss . '}';
-
-		// When the custom breakpoint is below the static CSS default (720px), also emit a
-		// reset block that restores desktop layout between the custom breakpoint and 719px.
-		if ( $bp < 720 ) {
-			$css .= '@media(min-width:' . $bp . 'px) and (max-width:719px){' .
-				'.cargo-drilldown-layout{flex-direction:row}' .
-				'.cargo-drilldown-layout .drilldown-results{order:0;width:auto}' .
-				'.cargo-drilldown-layout .drilldown-filters-wrapper' .
-					'{order:0;flex:0 0 var(--cargo-sidebar-width);width:auto;' .
-					'max-width:calc(var(--cargo-sidebar-width) + 40px);' .
-					'position:initial;max-height:initial;overflow:initial}' .
-				'.cargo-drilldown-layout .cargo-filters-toggle{display:none}' .
-				'}';
-		}
-
-		return $css;
+		return '@media(max-width:' . ( $bp - 1 ) . 'px){' . $mobileCss . '}';
 	}
 }
