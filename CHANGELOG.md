@@ -3,6 +3,18 @@
 All notable changes are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Changed
+
+- **CSS linting migrated from grunt-stylelint to the stylelint CLI**
+  (`npm run lint:css`): stylelint 17+ is pure ESM and cannot be loaded by
+  grunt-stylelint's CJS `require()`; this unblocks the
+  `stylelint-config-wikimedia` 0.16 → 0.19.2 bump (stylelint 17.6)
+- Dependabot: stylelint ignore rules removed (no longer blocked); grunt-eslint
+  major ignore re-documented — the actual blocker is that `eslint-config-wikimedia`
+  has no ESLint 9-compatible release yet (latest 0.32.4 peers on eslint ^8.57.0)
+
 ## [0.2.1] — 2026-06-12
 
 ### Fixed

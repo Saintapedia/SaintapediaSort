@@ -4,7 +4,6 @@ module.exports = function ( grunt ) {
 	grunt.loadNpmTasks( 'grunt-banana-checker' );
 	grunt.loadNpmTasks( 'grunt-eslint' );
 	grunt.loadNpmTasks( 'grunt-jsonlint' );
-	grunt.loadNpmTasks( 'grunt-stylelint' );
 
 	grunt.initConfig( {
 		banana: {
@@ -20,12 +19,11 @@ module.exports = function ( grunt ) {
 				'i18n/*.json',
 				'!node_modules/**'
 			]
-		},
-		stylelint: {
-			all: [ 'modules/**/*.css' ]
 		}
 	} );
 
-	grunt.registerTask( 'test', [ 'eslint', 'stylelint', 'banana', 'jsonlint' ] );
+	// CSS linting runs via the stylelint CLI (npm run lint:css); stylelint 17+
+	// is pure ESM and cannot be loaded by grunt-stylelint's CJS require().
+	grunt.registerTask( 'test', [ 'eslint', 'banana', 'jsonlint' ] );
 	grunt.registerTask( 'default', 'test' );
 };

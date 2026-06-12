@@ -9,16 +9,13 @@ updates:
       eslint:
         patterns: [ "eslint*", "grunt-eslint" ]
       stylelint:
-        patterns: [ "stylelint*", "grunt-stylelint" ]
+        patterns: [ "stylelint*" ]
     ignore:
-      # grunt-eslint 26+ requires ESLint 9 flat-config; migrate deliberately.
+      # grunt-eslint 25+ requires ESLint 9, but eslint-config-wikimedia
+      # (latest 0.32.4) only supports ESLint 8 (peer: eslint ^8.57.0).
+      # Blocked upstream until eslint-config-wikimedia ships ESLint 9 support.
       - dependency-name: grunt-eslint
         update-types: [ version-update:semver-major ]
-      # stylelint-config-wikimedia >=0.17 requires stylelint@17 (pure ESM).
-      # grunt-stylelint uses require() and cannot load ESM stylelint.
-      # Unblock by migrating to npx stylelint CLI or waiting for grunt-stylelint ESM support.
-      - dependency-name: stylelint-config-wikimedia
-        update-types: [ version-update:semver-minor, version-update:semver-major ]
 
   - package-ecosystem: github-actions
     directory: /
