@@ -164,7 +164,7 @@ a.cargo-chip-remove:focus-visible {
 }
 
 .cargo-drilldown-layout .drilldown-filter-values {
-	word-break: break-word;
+	overflow-wrap: break-word;
 }
 
 /* 7. JS-driven mobile layout — toggled by matchMedia watcher in JS */
