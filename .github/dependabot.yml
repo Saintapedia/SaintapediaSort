@@ -5,6 +5,15 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      eslint:
+        patterns: [ "eslint*", "grunt-eslint" ]
+      stylelint:
+        patterns: [ "stylelint*", "grunt-stylelint" ]
+    ignore:
+      # grunt-eslint 26+ requires ESLint 9 flat-config; migrate deliberately.
+      - dependency-name: grunt-eslint
+        update-types: [ version-update:semver-major ]
 
   - package-ecosystem: github-actions
     directory: /
