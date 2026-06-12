@@ -3,6 +3,29 @@
 All notable changes are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.1] — 2026-06-12
+
+### Fixed
+
+- **phpcs violations in Hooks.php:** extra space after comma in `min()` call and
+  aligned double-spacing in `@param`/`@return` docblock (PHPCS
+  `Universal.WhiteSpace.CommaSpacing` and `MediaWiki.Commenting.FunctionComment`)
+- **Deprecated CSS property:** `word-break: break-word` replaced with
+  `overflow-wrap: break-word` (standard property, flagged by stylelint ≥ 0.17)
+- **i18n:** `_search_*` chip label and range joiner (`→`) now use `mw.msg()` rather
+  than hardcoded English strings; new messages `saintapediasort-search-filter-label`
+  and `saintapediasort-range-value`
+- **Dead `mediawiki.util` dependency** removed from `ResourceModules`
+
+### Changed
+
+- GitHub Actions pinned to commit SHAs (`actions/checkout` v6, `actions/setup-node` v6)
+- Dependabot groups for eslint and stylelint ecosystems; ignore rules for
+  `grunt-eslint` major (ESLint 9 flat-config migration needed) and
+  `stylelint-config-wikimedia` minor/major (blocked until grunt-stylelint supports ESM)
+- npm dependencies bumped: `eslint-config-wikimedia` 0.27→0.32.4,
+  `grunt-banana-checker` 0.11→0.13.0, `grunt-jsonlint` 1.1→3.0.0
+
 ## [0.2.0] — 2026-06-10
 
 ### Fixed
